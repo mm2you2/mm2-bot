@@ -392,11 +392,28 @@ def health():
 
 @app.route(f"/webhook/{BOT_TOKEN}", methods=["POST"])
 def webhook():
-    if flask_request.headers.get("content-type") == "application/json":
-        json_string = flask_request.get_data().decode("utf-8")
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
+    import traceback
+    try:
+        if flask_request.headers.get("content-type") == "application/json":
+            json_string = flask_request.get_data().decode("utf-8")
+            update = telebot.types.Update.de_json(json_string)
+            bot.process_new_updates([update])
+    except Exception as e:
+        print(f"WEBHOOK ERROR: {e}")
+        traceback.print_exc()
     return "", 200
+
+
+@app.route("/debug", methods=["GET"])
+def debug():
+    try:
+        conn = get_conn()
+        conn.cursor().execute("SELECT 1")
+        conn.close()
+        db_ok = True
+    except Exception as e:
+        db_ok = str(e)
+    return jsonify({"db": db_ok, "token": bool(BOT_TOKEN), "db_url": bool(DATABASE_URL)})
 
 
 def setup_webhook():
