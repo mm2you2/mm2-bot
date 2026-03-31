@@ -195,19 +195,24 @@ WEBAPP_URL = "https://mm2you2.github.io/mm2-app/"
 
 @bot.message_handler(commands=["start"])
 def cmd_start(msg):
-    save_settings(msg.from_user.id)
-    if msg.from_user.username:
-        save_username(msg.from_user.id, msg.from_user.username)
+    try:
+        save_settings(msg.from_user.id)
+        if msg.from_user.username:
+            save_username(msg.from_user.id, msg.from_user.username)
+    except Exception as e:
+        print(f"START DB ERROR: {e}")
 
     kb = types.InlineKeyboardMarkup()
     kb.row(types.InlineKeyboardButton("Open MM2", web_app=types.WebAppInfo(url=WEBAPP_URL)))
 
-    bot.send_message(
-        msg.chat.id,
-        "🟢 *MM2 Income Tracker*\n\nTrack your income. Stay focused.",
-        parse_mode="Markdown",
-        reply_markup=kb
-    )
+    try:
+        from banner import create_banner
+        banner = create_banner()
+        bot.send_photo(msg.chat.id, banner, caption="Track your income. Stay focused.", reply_markup=kb)
+    except Exception as e:
+        print(f"BANNER ERROR: {e}")
+        bot.send_message(msg.chat.id, "🟢 *MM2 Income Tracker*\n\nTrack your income. Stay focused.",
+                         parse_mode="Markdown", reply_markup=kb)
 
 
 @bot.message_handler(commands=["add"])
@@ -307,6 +312,7 @@ def cb_currency(call):
 
 @bot.message_handler(func=lambda m: m.text and re.search(r'@\w+\s+[+\-]?\d', m.text), content_types=["text"])
 def group_add(msg):
+    print(f"GROUP MSG: {msg.text} from {msg.from_user.username} chat={msg.chat.id}")
     matches = re.findall(r'@(\w+)\s+([+\-]?\d+[.,]?\d*)', msg.text)
     if not matches:
         return
