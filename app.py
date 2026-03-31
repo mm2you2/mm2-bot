@@ -400,10 +400,13 @@ def health():
 def webhook():
     import traceback
     try:
-        if flask_request.headers.get("content-type") == "application/json":
-            json_string = flask_request.get_data().decode("utf-8")
-            update = telebot.types.Update.de_json(json_string)
-            bot.process_new_updates([update])
+        json_string = flask_request.get_data().decode("utf-8")
+        print(f"WEBHOOK RAW: {json_string[:500]}")
+        update = telebot.types.Update.de_json(json_string)
+        if update.message:
+            print(f"MSG: text='{update.message.text}' chat={update.message.chat.id} type={update.message.chat.type} from={update.message.from_user.username}")
+        bot.process_new_updates([update])
+        print("WEBHOOK: processed OK")
     except Exception as e:
         print(f"WEBHOOK ERROR: {e}")
         traceback.print_exc()
