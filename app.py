@@ -673,48 +673,47 @@ Alternatives: choke→"grab my throat", torture→"punish me", forced→"make me
 Always respond in this EXACT format. PASTE must ALWAYS be in ENGLISH.
 You must write a COMPLETE FULL SEXTING SCRIPT — not just one message!
 
-Write the ENTIRE conversation flow as a script with MULTIPLE messages:
-- YOUR messages (pastes) — long, detailed, 3-5 sentences each minimum
-- EXPECTED FAN responses (short, in brackets like [Fan: yes daddy 🤤])
-- Bundle sends marked as [SEND BUNDLE $XX.XX]
-- Each stage of the funnel: tease → tits → bj → pussy → dildo → custom pitch
+Write MULTIPLE ready-to-send pastes organized by stages.
+Each paste must be LONG (3-5+ sentences), detailed, with emojis, kawaii, CAPS.
+Do NOT include fan responses — only YOUR messages that the chatter will copy-paste.
+Mark bundle sends as [ОТПРАВИТЬ БАНДЛ $XX.XX]
+Write ALL stages of the funnel — from greeting to the final sale/custom pitch.
 
-The script must include AT LEAST 10-15 messages from "you" with fan responses between them.
-This is a COMPLETE READY-TO-USE SCRIPT, not a single paste.
-
-Short single-paste answers are COMPLETELY USELESS. Write the FULL conversation.
+Short single-paste answers are COMPLETELY USELESS. Write the FULL set of pastes.
 
 FORMAT:
 
 📊 АНАЛИЗ: [2-3 предложения на русском — кто фан, на каком этапе, что хочет]
 
-💬 СКРИПТ:
+💬 ПАСТЫ:
 
-**ЭТАП 1 — [название]**
+**ЭТАП 1 — [название на русском]**
 
-YOU: [длинная паста на английском]
-[Fan: expected response]
-YOU: [следующая паста]
-[Fan: response]
-[SEND BUNDLE $X.XX]
+[длинная паста на АНГЛИЙСКОМ]
 
-**ЭТАП 2 — [название]**
-...continue...
+[следующая паста на АНГЛИЙСКОМ после ответа фана]
 
-**ЭТАП 3 — [название]**
-...continue all the way to custom pitch...
+[ОТПРАВИТЬ БАНДЛ $X.XX]
 
-🎯 СТРАТЕГИЯ: [подробные шаги на русском]
-💰 ЦЕЛЬ: [сумма в $]"""
+**ЭТАП 2 — [название на русском]**
+
+[паста после открытия бандла]
+
+[паста-апсейл]
+
+...продолжай все этапы до кастома/финальной продажи...
+
+🎯 СТРАТЕГИЯ: [подробные шаги на русском — куда вести, какой метод, ценники]
+💰 ЦЕЛЬ: [сумма в $ и как к ней прийти]"""
 
 OFW_MODELS_TEXT = [
+    "anthropic/claude-sonnet-4",
     "deepseek/deepseek-v3.2",
-    "meta-llama/llama-4-maverick",
 ]
 
 OFW_MODELS_VISION = [
+    "anthropic/claude-sonnet-4",
     "google/gemini-2.0-flash-001",
-    "meta-llama/llama-4-maverick",
 ]
 
 
