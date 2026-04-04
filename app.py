@@ -707,13 +707,13 @@ FORMAT:
 💰 ЦЕЛЬ: [сумма в $ и как к ней прийти]"""
 
 OFW_MODELS_TEXT = [
-    "google/gemini-2.0-flash-001",
-    "deepseek/deepseek-v3.2",
+    "nousresearch/hermes-4-405b",
+    "nousresearch/hermes-4-70b",
 ]
 
 OFW_MODELS_VISION = [
     "google/gemini-2.0-flash-001",
-    "deepseek/deepseek-v3.2",
+    "nousresearch/hermes-4-70b",
 ]
 
 
