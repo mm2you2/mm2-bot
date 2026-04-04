@@ -670,14 +670,42 @@ Never use: choke, teen, torture, forced, gangbang, drunk, whipping, fisting, rap
 Alternatives: choke→"grab my throat", torture→"punish me", forced→"make me"
 
 ## RESPONSE FORMAT:
-Always respond in this EXACT format. PASTE must ALWAYS be in ENGLISH — this is critical, the fan speaks English.
-Write LONG detailed pastes like the examples above. Short answers are UNACCEPTABLE.
-Analysis and Strategy in Russian for the chatter.
+Always respond in this EXACT format. PASTE must ALWAYS be in ENGLISH.
+You must write a COMPLETE FULL SEXTING SCRIPT — not just one message!
 
-📊 АНАЛИЗ: [2-3 предложения — кто фан, на каком этапе, что хочет, buying power]
-💬 PASTE: [ДЛИННАЯ готовая паста на АНГЛИЙСКОМ — минимум 3-5 предложений, с эмодзи, kawaii, CAPS, деталями как в примерах выше]
-🎯 СТРАТЕГИЯ: [подробные следующие шаги на русском — куда вести, какой метод использовать, какие апсейлы, ценники]
-💰 ЦЕЛЬ: [реалистичная сумма в $ и как к ней прийти]"""
+Write the ENTIRE conversation flow as a script with MULTIPLE messages:
+- YOUR messages (pastes) — long, detailed, 3-5 sentences each minimum
+- EXPECTED FAN responses (short, in brackets like [Fan: yes daddy 🤤])
+- Bundle sends marked as [SEND BUNDLE $XX.XX]
+- Each stage of the funnel: tease → tits → bj → pussy → dildo → custom pitch
+
+The script must include AT LEAST 10-15 messages from "you" with fan responses between them.
+This is a COMPLETE READY-TO-USE SCRIPT, not a single paste.
+
+Short single-paste answers are COMPLETELY USELESS. Write the FULL conversation.
+
+FORMAT:
+
+📊 АНАЛИЗ: [2-3 предложения на русском — кто фан, на каком этапе, что хочет]
+
+💬 СКРИПТ:
+
+**ЭТАП 1 — [название]**
+
+YOU: [длинная паста на английском]
+[Fan: expected response]
+YOU: [следующая паста]
+[Fan: response]
+[SEND BUNDLE $X.XX]
+
+**ЭТАП 2 — [название]**
+...continue...
+
+**ЭТАП 3 — [название]**
+...continue all the way to custom pitch...
+
+🎯 СТРАТЕГИЯ: [подробные шаги на русском]
+💰 ЦЕЛЬ: [сумма в $]"""
 
 OFW_MODELS_TEXT = [
     "deepseek/deepseek-v3.2",
@@ -724,8 +752,8 @@ def ofw_analyze(text=None, images=None):
         for attempt in range(2):
             try:
                 resp = requests.post(OPENROUTER_URL, json={
-                    "model": model, "messages": messages, "max_tokens": 2048, "temperature": 0.8
-                }, headers=headers, timeout=90)
+                    "model": model, "messages": messages, "max_tokens": 8192, "temperature": 0.8
+                }, headers=headers, timeout=120)
                 if resp.status_code == 429:
                     if attempt == 0:
                         time.sleep(2)
