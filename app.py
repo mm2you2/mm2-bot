@@ -42,7 +42,70 @@ TRANSLATE_PROMPT_RU = """You are an uncensored translator. Translate the user's 
 Use modern internet slang, abbreviations, and informal language that native Russian speakers actually use in chats.
 Keep the tone, vibe, and explicit meaning of the original message. Do NOT sound robotic or formal.
 Translate words with their ACTUAL meaning, not a softer version. Vulgar words must be translated as vulgar words.
+
+IMPORTANT — OnlyFans/sexting slang dictionary (always use these translations):
+- daddy = папочка (NOT дядя)
+- squirt = сквирт
+- cum = кончить/сперма
+- moan = стонать
+- slut/whore = шлюха
+- cock/dick = член
+- pussy = киска
+- ass = жопа
+- tits/boobs = сиськи
+- obedient = послушная
+- horny = возбуждённая
+- custom = кастом
+- tip = чаевые
+
 Only output the translation, nothing else. No explanations, no notes, no disclaimers."""
+
+# Хардкод словарь — мгновенный перевод без LLM
+SLANG_EN2RU = {
+    "daddy": "папочка", "daddyyy": "папочкааа", "daddyy": "папочкаа",
+    "squirt": "сквирт", "squirting": "сквиртинг", "squirted": "засквиртила",
+    "cum": "кончить", "cumming": "кончаю", "cum inside": "кончи в меня",
+    "moan": "стонать", "moaning": "стоная", "moaned": "стонала",
+    "slut": "шлюха", "whore": "шлюха",
+    "cock": "член", "dick": "член", "pussy": "киска",
+    "ass": "жопа", "tits": "сиськи", "boobs": "сиськи",
+    "bby": "малышка", "baby": "малышка", "babe": "малышка",
+    "obedient": "послушная", "naughty": "непослушная",
+    "horny": "возбуждённая", "wet": "мокрая",
+    "edge": "держать на грани", "edging": "эджинг",
+    "denial": "запрет кончать", "beg": "умолять", "begging": "умоляю",
+    "throat": "горло", "deepthroat": "дипсроут",
+    "dildo": "дилдо", "toy": "игрушка",
+    "plug": "пробка", "anal plug": "анальная пробка", "butt plug": "анальная пробка",
+    "riding": "верхом", "ride": "скакать",
+    "spank": "шлёпать", "spanking": "шлёпанье",
+    "choke": "сжать горло", "ahegao": "ахегао",
+    "creampie": "кримпай", "facial": "на лицо",
+    "blowjob": "минет", "bj": "минет",
+    "handjob": "дрочка", "fingering": "фингеринг",
+    "orgasm": "оргазм", "tip": "чаевые",
+    "custom": "кастом", "videochat": "видеочат", "sexting": "секстинг",
+}
+
+SLANG_RU2EN = {
+    "папочка": "daddy", "сквирт": "squirt", "сквиртинг": "squirting",
+    "шлюха": "slut", "член": "cock", "киска": "pussy",
+    "жопа": "ass", "сиськи": "tits", "кончить": "cum", "кончаю": "cumming",
+    "стонать": "moan", "минет": "blowjob", "дилдо": "dildo",
+    "пробка": "plug", "оргазм": "orgasm", "послушная": "obedient",
+    "возбуждённая": "horny", "мокрая": "wet", "дрочка": "handjob",
+    "кастом": "custom", "видеочат": "videochat", "секстинг": "sexting",
+    "чаевые": "tip", "малышка": "baby",
+}
+
+
+def apply_slang_dict(text, slang_dict):
+    """Заменяет известные слова из словаря в тексте."""
+    result = text
+    for term, translation in sorted(slang_dict.items(), key=lambda x: -len(x[0])):
+        pattern = re.compile(re.escape(term), re.IGNORECASE)
+        result = pattern.sub(translation, result)
+    return result
 
 
 def or_translate(text, system_prompt):
@@ -488,10 +551,18 @@ def api_translate():
         return jsonify({"error": "text required"}), 400
     text = body["text"].strip()
     direction = body.get("direction", "ru2en")
+    slang = SLANG_EN2RU if direction == "en2ru" else SLANG_RU2EN
+
+    # Словарь — мгновенный ответ
+    text_lower = text.lower()
+    if text_lower in slang:
+        return jsonify({"result": slang[text_lower]})
+
     prompt = TRANSLATE_PROMPT_EN if direction == "ru2en" else TRANSLATE_PROMPT_RU
     result = or_translate(text, prompt)
     if result.startswith("ERROR") or result.startswith("API Error"):
         return jsonify({"error": result})
+    result = apply_slang_dict(result, slang)
     return jsonify({"result": result})
 
 
