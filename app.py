@@ -436,8 +436,8 @@ def api_set_data():
 
 
 CHAT_MODELS = [
+    "anthropic/claude-opus-4",
     "anthropic/claude-sonnet-4",
-    "anthropic/claude-haiku-4",
 ]
 
 CHAT_SYSTEM = """You are Claude, a helpful AI assistant made by Anthropic. You respond in the same language the user writes in.
