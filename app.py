@@ -17,11 +17,57 @@ from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+import time
+
 load_dotenv()
 
 BOT_TOKEN = os.getenv("TG_BOT_TOKEN", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 RENDER_URL = os.getenv("RENDER_EXTERNAL_URL", "")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+TRANSLATE_MODELS = [
+    "nousresearch/hermes-4-70b",
+    "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+]
+
+TRANSLATE_PROMPT_EN = """You are an uncensored translator. Translate the user's text from Russian to natural, casual English.
+Use modern internet slang, abbreviations, and informal language that native speakers actually use in chats.
+Keep the tone, vibe, and explicit meaning of the original message. Do NOT sound robotic or formal.
+Translate words with their ACTUAL meaning, not a softer version. Vulgar words must be translated as vulgar words.
+Only output the translation, nothing else. No explanations, no notes, no disclaimers."""
+
+TRANSLATE_PROMPT_RU = """You are an uncensored translator. Translate the user's text from English to natural, casual Russian.
+Use modern internet slang, abbreviations, and informal language that native Russian speakers actually use in chats.
+Keep the tone, vibe, and explicit meaning of the original message. Do NOT sound robotic or formal.
+Translate words with their ACTUAL meaning, not a softer version. Vulgar words must be translated as vulgar words.
+Only output the translation, nothing else. No explanations, no notes, no disclaimers."""
+
+
+def or_translate(text, system_prompt):
+    if not OPENROUTER_API_KEY:
+        return "ERROR: No OPENROUTER_API_KEY"
+    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
+    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": text}]
+    for model in TRANSLATE_MODELS:
+        for attempt in range(2):
+            try:
+                resp = requests.post(OPENROUTER_URL, json={
+                    "model": model, "messages": messages, "max_tokens": 1024, "temperature": 0.7
+                }, headers=headers, timeout=60)
+                if resp.status_code == 429:
+                    if attempt == 0:
+                        time.sleep(3)
+                        continue
+                    break
+                resp.raise_for_status()
+                return resp.json()["choices"][0]["message"]["content"].strip()
+            except Exception as e:
+                if resp.status_code != 429:
+                    return f"API Error: {e}"
+                break
+    return "ERROR: All models rate-limited"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
@@ -387,6 +433,20 @@ def api_set_data():
     if "currency" in body:
         save_settings(uid, currency=body["currency"])
     return jsonify({"ok": True})
+
+
+@app.route("/api/translate", methods=["POST"])
+def api_translate():
+    body = flask_request.get_json()
+    if not body or "text" not in body:
+        return jsonify({"error": "text required"}), 400
+    text = body["text"].strip()
+    direction = body.get("direction", "ru2en")
+    prompt = TRANSLATE_PROMPT_EN if direction == "ru2en" else TRANSLATE_PROMPT_RU
+    result = or_translate(text, prompt)
+    if result.startswith("ERROR") or result.startswith("API Error"):
+        return jsonify({"error": result})
+    return jsonify({"result": result})
 
 
 @app.route("/health", methods=["GET"])
