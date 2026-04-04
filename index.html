@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MM2</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --accent: #00ff66;
+            --accent-dim: #009933;
+            --accent-glow: 0 0 15px rgba(0, 255, 102, 0.5);
+            --bg: #000;
+            --card-bg: rgba(10, 10, 10, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #fff;
+            --dim: #444;
+            --red: #ff4d4d;
+            --grid1: rgba(255, 255, 255, 0.03);
+            --radial: rgba(0, 255, 102, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: -apple-system, 'Inter', 'Segoe UI', sans-serif;
+            padding: 10px; overflow-x: hidden; user-select: none;
+            background-image:
+                radial-gradient(circle at 50% 50%, var(--radial) 0%, transparent 80%),
+                linear-gradient(var(--grid1) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid1) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            opacity: 0; transform: scale(0.98);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, background 0.5s, color 0.5s;
+        }
+        body.loaded { opacity: 1; transform: scale(1); }
+        body.no-grid { background-image: none; }
+        input, button { user-select: text; }
+
+        /* Settings gear */
+        .settings-btn {
+            position: fixed; top: 12px; left: 12px; z-index: 200;
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+            background: rgba(0,0,0,0.6); cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: var(--transition); backdrop-filter: blur(10px);
+        }
+        .settings-btn:hover { border-color: var(--accent); }
+        .settings-btn svg { width: 16px; height: 16px; fill: var(--dim); transition: var(--transition); }
+        .settings-btn:hover svg { fill: var(--accent); }
+
+        /* Settings overlay */
+        .settings-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 300;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .settings-overlay.open { display: flex !important; opacity: 1; }
+        .settings-overlay { align-items: flex-start; padding-top: 10px; }
+        .settings-panel {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; width: 90%; max-width: 340px;
+        }
+        .settings-title {
+            font-size: 11px; font-weight: 900; color: var(--dim); text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 16px; text-align: center;
+        }
+        .theme-grid { display: flex; flex-direction: column; gap: 8px; }
+        .theme-option {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 10px; border: 1px solid var(--border); cursor: pointer;
+            transition: var(--transition); background: transparent;
+        }
+        .theme-option:hover { background: rgba(255,255,255,0.03); }
+        .theme-option.active { border-color: var(--accent); background: rgba(255,255,255,0.05); }
+        .theme-dot {
+            width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .theme-name { font-size: 13px; font-weight: 800; color: var(--text); }
+        .theme-close {
+            margin-top: 16px; width: 100%; padding: 10px; border-radius: 10px;
+            border: 1px solid var(--border); background: transparent; color: var(--dim);
+            font-weight: 900; font-size: 10px; text-transform: uppercase; cursor: pointer;
+            transition: var(--transition);
+        }
+        .theme-close:hover { border-color: var(--accent); color: var(--accent); }
+
+        .top-bar { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; padding: 0 36px; }
+        .currency-toggle {
+            display: flex; gap: 6px; justify-content: center;
+            background: rgba(255,255,255,0.03); padding: 4px; border-radius: 12px; border: 1px solid var(--border);
+        }
+        .curr-btn {
+            padding: 8px 20px; border-radius: 9px; border: 1px solid transparent; background: transparent;
+            color: var(--dim); font-weight: 900; font-size: 11px; cursor: pointer; transition: var(--transition);
+            text-transform: uppercase; text-align: center;
+        }
+        .curr-btn.active { background: var(--accent); color: var(--bg); box-shadow: var(--accent-glow); border-color: var(--accent); }
+
+        .periods { display: flex; gap: 8px; margin-bottom: 12px; }
+        .card { flex: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .card-header { text-align: center; font-weight: 900; font-size: 8px; padding: 8px; color: var(--dim); border-bottom: 1px solid var(--border); text-transform: uppercase; }
+
+        .row {
+            display: flex; height: 28px; align-items: center; padding: 0 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.02); transition: var(--transition);
+        }
+        .row.today { background: color-mix(in srgb, var(--accent) 5%, transparent); border-left: 2px solid var(--accent); }
+        .day { width: 22px; flex-shrink: 0; color: var(--dim); font-size: 9px; font-weight: 800; }
+        .row.today .day { color: var(--accent); }
+        .row input {
+            flex: 1; width: 100%; border: none; background: transparent; color: var(--text);
+            text-align: right; font-size: 13px; font-weight: 900; outline: none;
+        }
+        .row input:focus { color: var(--accent); text-shadow: var(--accent-glow); }
+
+        .goal-block {
+            background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px;
+            border: 1px solid var(--border); margin-bottom: 12px;
+        }
+        .goal-block .label { font-size: 7px; color: var(--dim); letter-spacing: 2px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+        .goal-block input { width: 100%; border: none; background: transparent; color: var(--text); font-size: 20px; font-weight: 900; outline: none; }
+        .progress-bar { width: 100%; height: 4px; background: #111; margin-top: 8px; border-radius: 2px; overflow: hidden; }
+        #progress-fill { height: 100%; background: var(--accent); box-shadow: var(--accent-glow); transition: 1s ease-in-out; width: 0%; }
+        .milestones { display: flex; gap: 3px; margin-top: 6px; flex-wrap: wrap; }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: #1a1a1a; transition: all 0.5s ease; }
+        .dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        #goal-remaining { font-size: 8px; color: #666; margin-top: 6px; text-transform: uppercase; }
+
+        .rate-widget {
+            font-size: 9px; color: #555; font-weight: 800;
+            background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px;
+            display: flex; justify-content: space-between; border: 1px solid var(--border); margin-bottom: 12px;
+        }
+        .highlight { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
+
+        .stat-block { border-left: 2px solid var(--border); padding: 8px 12px; margin-bottom: 10px; transition: var(--transition); }
+        .stat-block.main-total { border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 3%, transparent); border-radius: 0 12px 12px 0; }
+        .label { font-size: 7px; color: var(--dim); letter-spacing: 2px; font-weight: 800; margin-bottom: 3px; text-transform: uppercase; }
+        .val { font-size: 28px; font-weight: 900; color: var(--accent); line-height: 1; text-shadow: var(--accent-glow); }
+        .sub-stats { margin-top: 4px; display: flex; gap: 12px; }
+        .sub-item { font-size: 9px; color: #555; font-weight: 700; }
+        .pace { color: #888; font-size: 8px; }
+
+        .btn-reset {
+            width: 100%; margin-top: 15px; background: transparent; color: #333; border: 1px solid #1a1a1a;
+            padding: 12px; border-radius: 10px; cursor: pointer; font-size: 9px;
+            font-weight: 900; text-transform: uppercase; transition: var(--transition);
+        }
+        .btn-reset:hover { border-color: var(--red); color: var(--red); }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            display: flex; background: rgba(0,0,0,0.95); border-top: 1px solid var(--border);
+            backdrop-filter: blur(20px); padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        .nav-tab {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 10px 0; cursor: pointer; transition: var(--transition);
+            border: none; background: none; color: var(--dim); font-size: 9px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px; gap: 4px;
+        }
+        .nav-tab.active { color: var(--accent); }
+        .nav-tab svg { width: 20px; height: 20px; fill: currentColor; }
+        .nav-tab:active { transform: scale(0.95); }
+
+        .page { display: none; padding-bottom: 60px; }
+        .page.active { display: block; }
+
+        /* Translate page */
+        .translate-container { padding: 0; }
+        .translate-direction {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            margin-bottom: 15px;
+        }
+        .lang-name {
+            font-size: 12px; font-weight: 900; color: var(--dim);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .lang-name.active-lang { color: var(--accent); }
+        .swap-dir {
+            width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--card-bg); cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: var(--transition); color: var(--accent); font-size: 16px;
+        }
+        .swap-dir:hover { background: var(--accent); color: var(--bg); transform: rotate(180deg); }
+
+        .translate-input-box, .translate-output-box {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 14px; margin-bottom: 10px; position: relative;
+        }
+        .translate-label {
+            font-size: 7px; color: var(--dim); font-weight: 800; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 8px;
+        }
+        .translate-input-box textarea {
+            width: 100%; border: none; background: transparent; color: var(--text);
+            font-size: 14px; font-weight: 600; line-height: 1.5; resize: none;
+            outline: none; min-height: 100px; font-family: inherit;
+        }
+        .translate-input-box textarea::placeholder { color: #222; }
+        .translate-output {
+            font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--accent);
+            min-height: 100px; white-space: pre-wrap;
+        }
+        .translate-output.loading { animation: pulse 1.5s infinite; color: var(--dim); }
+        @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        .translate-actions { display: flex; gap: 8px; }
+        .tr-btn {
+            flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: transparent; color: var(--dim); font-weight: 900; font-size: 10px;
+            text-transform: uppercase; cursor: pointer; transition: var(--transition); letter-spacing: 1px;
+        }
+        .tr-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .tr-btn.primary {
+            background: var(--accent); color: var(--bg); border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+        }
+        .tr-btn.primary:hover { opacity: 0.9; }
+        .tr-btn.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .char-info { font-size: 8px; color: var(--dim); margin-top: 6px; text-align: right; }
+
+        .tr-history { margin-top: 15px; }
+        .tr-history-title {
+            font-size: 7px; color: var(--dim); font-weight: 800; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 8px;
+        }
+        .tr-history-item {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: 10px 12px; margin-bottom: 6px;
+        }
+        .tr-history-original { font-size: 11px; color: var(--dim); margin-bottom: 3px; }
+        .tr-history-translated { font-size: 12px; color: var(--accent); font-weight: 700; }
+
+        /* Home screen */
+        .home-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 80vh; gap: 20px; padding: 20px;
+        }
+        .home-title {
+            font-size: 24px; font-weight: 900; color: var(--accent);
+            text-shadow: var(--accent-glow); letter-spacing: -1px;
+        }
+        .home-subtitle {
+            font-size: 10px; color: var(--dim); text-transform: uppercase;
+            letter-spacing: 3px; margin-top: -10px;
+        }
+        .home-cards { display: flex; gap: 12px; width: 100%; max-width: 340px; }
+        .home-card {
+            flex: 1; background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 30px 15px; text-align: center; cursor: pointer;
+            transition: var(--transition); display: flex; flex-direction: column;
+            align-items: center; gap: 12px;
+        }
+        .home-card:hover, .home-card:active {
+            border-color: var(--accent); background: color-mix(in srgb, var(--accent) 5%, transparent);
+            transform: scale(1.03);
+        }
+        .home-card svg { width: 36px; height: 36px; fill: var(--accent); }
+        .home-card-title { font-size: 14px; font-weight: 900; color: var(--text); }
+        .home-card-desc { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+        .home-cards { flex-wrap: wrap; }
+
+        /* Password overlay */
+        .pass-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 400;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(30px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .pass-overlay.open { display: flex !important; opacity: 1; }
+        .pass-panel {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+            padding: 30px; width: 85%; max-width: 300px; text-align: center;
+        }
+        .pass-panel svg { width: 40px; height: 40px; fill: var(--accent); margin-bottom: 15px; }
+        .pass-title { font-size: 14px; font-weight: 900; color: var(--text); margin-bottom: 5px; }
+        .pass-desc { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        .pass-input {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+            background: transparent; color: var(--text); font-size: 16px; font-weight: 700;
+            text-align: center; outline: none; letter-spacing: 3px; font-family: inherit;
+            transition: var(--transition);
+        }
+        .pass-input:focus { border-color: var(--accent); box-shadow: var(--accent-glow); }
+        .pass-input.wrong { border-color: var(--red); animation: shake 0.4s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        .pass-btn {
+            width: 100%; margin-top: 12px; padding: 12px; border-radius: 10px;
+            background: var(--accent); color: var(--bg); border: none;
+            font-weight: 900; font-size: 11px; text-transform: uppercase; cursor: pointer;
+            transition: var(--transition); letter-spacing: 1px;
+        }
+        .pass-btn:hover { opacity: 0.9; }
+        .pass-cancel {
+            margin-top: 10px; background: transparent; border: 1px solid var(--border);
+            color: var(--dim); width: 100%; padding: 10px; border-radius: 10px;
+            font-weight: 900; font-size: 9px; text-transform: uppercase; cursor: pointer;
+            transition: var(--transition);
+        }
+        .pass-cancel:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* OFW Admin */
+        .ofw-admin {
+            padding: 15px 0;
+        }
+        .ofw-admin-title {
+            text-align: center; font-size: 12px; font-weight: 900; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 15px;
+            text-shadow: var(--accent-glow);
+        }
+        .ofw-section {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px;
+            padding: 15px; margin: 0 15px 12px;
+        }
+        .ofw-section-title {
+            font-size: 9px; font-weight: 900; color: var(--dim); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 10px;
+        }
+        .ofw-textarea {
+            width: 100%; min-height: 120px; padding: 12px; border-radius: 10px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+            color: var(--text); font-size: 13px; line-height: 1.5; resize: vertical;
+            outline: none; font-family: inherit; transition: var(--transition);
+        }
+        .ofw-textarea:focus { border-color: var(--accent); box-shadow: var(--accent-glow); }
+        .ofw-textarea::placeholder { color: var(--dim); font-size: 11px; }
+        .ofw-btn-row {
+            display: flex; gap: 8px; margin-top: 10px;
+        }
+        .ofw-btn {
+            flex: 1; padding: 12px; border-radius: 10px; border: none;
+            font-weight: 900; font-size: 11px; text-transform: uppercase;
+            cursor: pointer; transition: var(--transition); letter-spacing: 1px;
+        }
+        .ofw-btn-primary {
+            background: var(--accent); color: var(--bg);
+        }
+        .ofw-btn-primary:hover { opacity: 0.9; }
+        .ofw-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .ofw-btn-secondary {
+            background: transparent; border: 1px solid var(--border); color: var(--dim);
+        }
+        .ofw-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+        .ofw-result {
+            margin: 0 15px 12px; background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 14px; padding: 15px; display: none;
+        }
+        .ofw-result.visible { display: block; }
+        .ofw-result-label {
+            font-size: 9px; font-weight: 900; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 8px;
+        }
+        .ofw-result-text {
+            font-size: 13px; line-height: 1.6; color: var(--text); white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .ofw-result-text .ofw-tag {
+            display: inline-block; font-size: 10px; font-weight: 900; color: var(--accent);
+            margin-top: 8px;
+        }
+        .ofw-copy-btn {
+            margin-top: 10px; padding: 8px 16px; border-radius: 8px;
+            background: transparent; border: 1px solid var(--border); color: var(--dim);
+            font-size: 10px; font-weight: 900; text-transform: uppercase; cursor: pointer;
+            transition: var(--transition); letter-spacing: 1px;
+        }
+        .ofw-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .ofw-loading {
+            text-align: center; padding: 20px; color: var(--dim); font-size: 11px;
+            text-transform: uppercase; letter-spacing: 2px;
+            animation: pulse 1.5s infinite;
+        }
+        .ofw-history { margin: 0 15px 12px; }
+        .ofw-history-title {
+            font-size: 9px; font-weight: 900; color: var(--dim); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 8px;
+        }
+        .ofw-history-item {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: var(--transition);
+        }
+        .ofw-history-item:hover { border-color: var(--accent); }
+        .ofw-history-item .ofw-h-preview {
+            font-size: 11px; color: var(--text); white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        .ofw-history-item .ofw-h-time {
+            font-size: 9px; color: var(--dim); margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+        <div class="home-screen">
+            <div class="home-title">MM2</div>
+            <div class="home-subtitle">Choose your tool</div>
+            <div class="home-cards">
+                <div class="home-card" onclick="switchTab('mm2')">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.94s4.18 1.36 4.18 3.85c0 1.89-1.44 2.93-3.12 3.19z"/></svg>
+                    <div class="home-card-title">MM2</div>
+                    <div class="home-card-desc">Income Tracker</div>
+                </div>
+                <div class="home-card" onclick="switchTab('translate')">
+                    <svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+                    <div class="home-card-title">Translate</div>
+                    <div class="home-card-desc">Slang Translator</div>
+                </div>
+                <div class="home-card" onclick="showPassPrompt()">
+                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    <div class="home-card-title">OFW</div>
+                    <div class="home-card-desc">Private Access</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSWORD OVERLAY -->
+    <div class="pass-overlay" id="passOverlay" onclick="if(event.target===this)hidePassPrompt()">
+        <div class="pass-panel">
+            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <div class="pass-title">OFW</div>
+            <div class="pass-desc">Enter password</div>
+            <input class="pass-input" id="passInput" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPass()">
+            <button class="pass-btn" onclick="checkPass()">Unlock</button>
+            <button class="pass-cancel" onclick="hidePassPrompt()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- OFW PAGE -->
+    <div class="page" id="page-ofw">
+        <div class="ofw-admin">
+            <div class="ofw-admin-title">OFW Chat Analyzer</div>
+
+            <div class="ofw-section">
+                <div class="ofw-section-title">Paste chat or describe situation</div>
+                <textarea class="ofw-textarea" id="ofwInput" placeholder="Paste fan's messages, describe the situation, fan's fetishes, buying power, what you want to sell..."></textarea>
+                <div class="ofw-btn-row">
+                    <button class="ofw-btn ofw-btn-secondary" onclick="ofwClear()">Clear</button>
+                    <button class="ofw-btn ofw-btn-primary" id="ofwAnalyzeBtn" onclick="ofwAnalyze()">Analyze</button>
+                    <button class="ofw-btn ofw-btn-secondary" onclick="ofwCopyResult()">Copy</button>
+                </div>
+            </div>
+
+            <div class="ofw-result" id="ofwResult">
+                <div class="ofw-result-label">Result</div>
+                <div class="ofw-result-text" id="ofwResultText"></div>
+            </div>
+
+            <div class="ofw-history" id="ofwHistory" style="display:none;">
+                <div class="ofw-history-title">History</div>
+                <div id="ofwHistoryList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MM2 PAGE -->
+    <div class="page" id="page-mm2">
+    <button class="settings-btn" onclick="toggleSettings()">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1112 8.4a3.6 3.6 0 010 7.2z"/></svg>
+    </button>
+
+    <div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)toggleSettings()">
+        <div class="settings-panel">
+            <div class="settings-title">Theme</div>
+            <div class="theme-grid" id="themeGrid"></div>
+            <button class="theme-close" onclick="toggleSettings()">Close</button>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="currency-toggle">
+            <button class="curr-btn" id="btn-usd" onclick="setCurrency('USD')">USD $</button>
+            <button class="curr-btn" id="btn-rub" onclick="setCurrency('RUB')">RUB ₽</button>
+        </div>
+    </div>
+
+    <div class="goal-block">
+        <div class="label">Цель (<span class="unit">$</span>)</div>
+        <input id="target-val" type="text" inputmode="decimal" placeholder="7000" oninput="calc()" ondblclick="this.value='';calc()">
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <div id="milestones" class="milestones"></div>
+        <div id="goal-remaining">Осталось: 0</div>
+    </div>
+
+    <div class="rate-widget">
+        <span>КУРС ЦБ:</span>
+        <span class="highlight">1$ = <span id="current-rate">0.00</span>₽</span>
+    </div>
+
+    <div class="periods">
+        <div class="card"><div class="card-header">Период I</div><div id="col1"></div></div>
+        <div class="card"><div class="card-header">Период II</div><div id="col2"></div></div>
+    </div>
+
+    <div class="stat-block">
+        <div class="label">1 - 15 число</div>
+        <div class="val"><span class="unit">$</span><span id="s1">0</span></div>
+        <div class="sub-stats">
+            <div class="sub-item">20%: <span id="p1" class="highlight">0</span></div>
+            <div class="pace">Темп: <span id="pace1">0</span>/день</div>
+        </div>
+    </div>
+
+    <div class="stat-block main-total">
+        <div class="label">Итого за месяц</div>
+        <div class="val"><span class="unit">$</span><span id="st">0</span></div>
+        <div class="sub-stats">
+            <div class="sub-item">Чистая прибыль: <span id="pt" class="highlight">0</span></div>
+            <div class="pace">Общий темп: <span id="paceT">0</span>/день</div>
+        </div>
+    </div>
+
+    <div class="stat-block">
+        <div class="label">16 - 31 число</div>
+        <div class="val"><span class="unit">$</span><span id="s2">0</span></div>
+        <div class="sub-stats">
+            <div class="sub-item">20%: <span id="p2" class="highlight">0</span></div>
+            <div class="pace">Темп: <span id="pace2">0</span>/день</div>
+        </div>
+    </div>
+
+    <button class="btn-reset" onclick="resetData()">Очистить цикл</button>
+    </div>
+
+    <!-- TRANSLATE PAGE -->
+    <div class="page" id="page-translate">
+        <div class="translate-container">
+            <div class="translate-direction">
+                <span class="lang-name active-lang" id="trFromLang">Русский</span>
+                <button class="swap-dir" onclick="swapTranslateDir()">⇄</button>
+                <span class="lang-name" id="trToLang">English</span>
+            </div>
+
+            <div class="translate-input-box">
+                <div class="translate-label">Введите текст</div>
+                <textarea id="trInput" placeholder="Начни печатать..." oninput="updateCharCount()"></textarea>
+                <div class="char-info"><span id="trCharCount">0</span> символов</div>
+            </div>
+
+            <div class="translate-actions">
+                <button class="tr-btn" onclick="clearTranslate()">Очистить</button>
+                <button class="tr-btn primary" id="trBtn" onclick="doTranslateWeb()">Перевести</button>
+                <button class="tr-btn" onclick="copyTranslation()">Копировать</button>
+            </div>
+
+            <div class="translate-output-box">
+                <div class="translate-label">Перевод</div>
+                <div class="translate-output" id="trOutput"></div>
+            </div>
+
+            <div class="tr-history" id="trHistorySection" style="display:none;">
+                <div class="tr-history-title">История</div>
+                <div id="trHistoryList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav" id="bottomNav" style="display:none;">
+        <button class="nav-tab" id="tab-home" onclick="switchTab('home')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+        </button>
+        <button class="nav-tab" id="tab-mm2" onclick="switchTab('mm2')">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.94s4.18 1.36 4.18 3.85c0 1.89-1.44 2.93-3.12 3.19z"/></svg>
+            MM2
+        </button>
+        <button class="nav-tab" id="tab-translate" onclick="switchTab('translate')">
+            <svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+            Translate
+        </button>
+        <button class="nav-tab" id="tab-ofw" onclick="showPassPrompt()">
+            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            OFW
+        </button>
+    </div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // ── Themes ────────────────────────────────────────────
+    const THEMES = {
+        neon: {
+            name: "Neon Green", dot: "#00ff66", headerBg: "#000000",
+            vars: {
+                "--accent": "#00ff66", "--accent-dim": "#009933",
+                "--accent-glow": "0 0 15px rgba(0,255,102,0.5)",
+                "--bg": "#000", "--card-bg": "rgba(10,10,10,0.9)",
+                "--border": "rgba(255,255,255,0.08)", "--text": "#fff", "--dim": "#444",
+                "--grid1": "rgba(255,255,255,0.03)", "--radial": "rgba(0,255,102,0.05)"
+            }, grid: true
+        },
+        bw: {
+            name: "B&W", dot: "#ffffff", headerBg: "#000000",
+            vars: {
+                "--accent": "#ffffff", "--accent-dim": "#888888",
+                "--accent-glow": "0 0 10px rgba(255,255,255,0.3)",
+                "--bg": "#000", "--card-bg": "rgba(15,15,15,0.9)",
+                "--border": "rgba(255,255,255,0.1)", "--text": "#fff", "--dim": "#555",
+                "--grid1": "transparent", "--radial": "transparent"
+            }, grid: false
+        },
+        violet: {
+            name: "Violet", dot: "#b464ff", headerBg: "#08050f",
+            vars: {
+                "--accent": "#b464ff", "--accent-dim": "#7840b4",
+                "--accent-glow": "0 0 15px rgba(180,100,255,0.5)",
+                "--bg": "#08050f", "--card-bg": "rgba(14,10,22,0.9)",
+                "--border": "rgba(180,100,255,0.1)", "--text": "#f0ebff", "--dim": "#46405a",
+                "--grid1": "rgba(180,100,255,0.03)", "--radial": "rgba(180,100,255,0.05)"
+            }, grid: true
+        },
+        gold: {
+            name: "Gold", dot: "#ffc832", headerBg: "#080805",
+            vars: {
+                "--accent": "#ffc832", "--accent-dim": "#b48c1e",
+                "--accent-glow": "0 0 15px rgba(255,200,50,0.5)",
+                "--bg": "#080805", "--card-bg": "rgba(15,14,10,0.9)",
+                "--border": "rgba(255,200,50,0.1)", "--text": "#fffaf0", "--dim": "#5a503c",
+                "--grid1": "rgba(255,200,50,0.03)", "--radial": "rgba(255,200,50,0.05)"
+            }, grid: true
+        },
+        cyan: {
+            name: "Cyan", dot: "#00dcff", headerBg: "#03080c",
+            vars: {
+                "--accent": "#00dcff", "--accent-dim": "#0082a0",
+                "--accent-glow": "0 0 15px rgba(0,220,255,0.5)",
+                "--bg": "#03080c", "--card-bg": "rgba(8,14,20,0.9)",
+                "--border": "rgba(0,220,255,0.1)", "--text": "#e6f5ff", "--dim": "#324b5a",
+                "--grid1": "rgba(0,220,255,0.03)", "--radial": "rgba(0,220,255,0.05)"
+            }, grid: true
+        }
+    };
+
+    let currentTheme = 'neon';
+
+    function applyTheme(id) {
+        const theme = THEMES[id];
+        if (!theme) return;
+        currentTheme = id;
+        const root = document.documentElement;
+        for (const [k, v] of Object.entries(theme.vars)) root.style.setProperty(k, v);
+        document.body.classList.toggle('no-grid', !theme.grid);
+        try {
+            tg.setHeaderColor(theme.headerBg);
+            tg.setBackgroundColor(theme.headerBg);
+        } catch(e) {}
+        // Update active state
+        document.querySelectorAll('.theme-option').forEach(el => {
+            el.classList.toggle('active', el.dataset.theme === id);
+        });
+        localStorage.setItem('mm2_theme', id);
+    }
+
+    function buildThemeGrid() {
+        const grid = document.getElementById('themeGrid');
+        grid.innerHTML = '';
+        for (const [id, theme] of Object.entries(THEMES)) {
+            const el = document.createElement('div');
+            el.className = `theme-option${id === currentTheme ? ' active' : ''}`;
+            el.dataset.theme = id;
+            el.innerHTML = `<div class="theme-dot" style="background:${theme.dot}"></div><div class="theme-name">${theme.name}</div>`;
+            el.onclick = () => applyTheme(id);
+            grid.appendChild(el);
+        }
+    }
+
+    function toggleSettings() {
+        const overlay = document.getElementById('settingsOverlay');
+        overlay.classList.toggle('open');
+    }
+
+    // ── API Sync ─────────────────────────────────────────
+    const API_URL = 'https://mm2-bot.onrender.com';
+    let userId = null;
+    try { userId = tg.initDataUnsafe?.user?.id; } catch(e) {}
+
+    async function syncFromServer() {
+        if (!userId) return;
+        try {
+            const res = await fetch(`${API_URL}/api/data?user_id=${userId}`, {signal: AbortSignal.timeout(3000)});
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data && data.values) {
+                const saved = { values: data.values, target: data.target || "", currency: data.currency || "USD" };
+                loadData(saved);
+                // Обновляем localStorage свежими данными с сервера
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+            }
+            if (data.rate) { rubRate = data.rate; document.getElementById('current-rate').innerText = rubRate.toFixed(2); }
+        } catch(e) { console.log('API sync failed, using local'); }
+    }
+
+    async function syncToServer() {
+        if (!userId) return;
+        try {
+            const targetInput = document.getElementById('target-val');
+            const payload = { user_id: userId };
+            for (let i = 1; i <= 31; i++) {
+                const input = document.getElementById('v' + i);
+                if (input && input.value) {
+                    const val = parseFloat(input.value.replace(',', '.')) || 0;
+                    if (val !== 0) {
+                        await fetch(`${API_URL}/api/data`, {
+                            method: 'POST', headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({user_id: userId, day: i, amount: val}),
+                            signal: AbortSignal.timeout(2000)
+                        });
+                    }
+                }
+            }
+            if (targetInput.value) {
+                await fetch(`${API_URL}/api/data`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, target: targetInput.value, currency: currentCurrency}),
+                    signal: AbortSignal.timeout(2000)
+                });
+            }
+        } catch(e) {}
+    }
+
+    // ── App Logic ────────────────────────────────────────
+    let currentCurrency = 'USD';
+    let rubRate = 92.5;
+    const today = new Date().getDate();
+    const STORAGE_KEY = 'mm2_data';
+
+    function createRows() {
+        const c1 = document.getElementById('col1'), c2 = document.getElementById('col2');
+        for (let i = 1; i <= 31; i++) {
+            const isToday = i === today ? 'today' : '';
+            const html = `
+                <div class="row ${isToday}" onclick="document.getElementById('v${i}').focus()">
+                    <div class="day">${i}</div>
+                    <input id="v${i}" type="text" inputmode="decimal" data-idx="${i}" placeholder="—"
+                           oninput="calc()" onfocus="this.select()" ondblclick="this.value='';calc()">
+                </div>`;
+            if (i <= 15) c1.innerHTML += html; else c2.innerHTML += html;
+        }
+    }
+
+    function calc() {
+        let sum1 = 0, sum2 = 0, d1 = 0, d2 = 0;
+        let targetInput = document.getElementById('target-val');
+        let rawData = { values: {}, target: targetInput.value, currency: currentCurrency };
+
+        for (let i = 1; i <= 31; i++) {
+            const input = document.getElementById('v' + i);
+            if (input) {
+                const val = parseFloat(input.value.replace(',', '.')) || 0;
+                if (i <= 15) { sum1 += val; if (val > 0) d1++; }
+                else { sum2 += val; if (val > 0) d2++; }
+                rawData.values[i] = input.value;
+            }
+        }
+
+        const totalUSD = sum1 + sum2;
+        const targetUSD = parseFloat(rawData.target) || 7000;
+        const mult = currentCurrency === 'RUB' ? rubRate : 1;
+        const unit = currentCurrency === 'USD' ? '$' : '₽';
+        const f = (v) => (v * mult).toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+
+        document.getElementById('s1').innerText = f(sum1);
+        document.getElementById('p1').innerText = f(sum1 * 0.2);
+        document.getElementById('pace1').innerText = unit + f(d1 > 0 ? sum1 / d1 : 0);
+        document.getElementById('s2').innerText = f(sum2);
+        document.getElementById('p2').innerText = f(sum2 * 0.2);
+        document.getElementById('pace2').innerText = unit + f(d2 > 0 ? sum2 / d2 : 0);
+        document.getElementById('st').innerText = f(totalUSD);
+        document.getElementById('pt').innerText = f(totalUSD * 0.2);
+        document.getElementById('paceT').innerText = unit + f((d1 + d2) > 0 ? totalUSD / (d1 + d2) : 0);
+
+        const rem = Math.max(targetUSD - totalUSD, 0);
+        document.getElementById('goal-remaining').innerText = `Осталось: ${unit}${f(rem)}`;
+        const progress = Math.min((totalUSD / targetUSD) * 100, 100);
+        document.getElementById('progress-fill').style.width = (progress || 0) + '%';
+
+        const mc = document.getElementById('milestones');
+        mc.innerHTML = '';
+        for (let m = 500; m <= targetUSD; m += 500) {
+            const dot = document.createElement('div');
+            dot.className = totalUSD >= m ? 'dot active' : 'dot';
+            mc.appendChild(dot);
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(rawData));
+        clearTimeout(window._saveTimer);
+        window._saveTimer = setTimeout(() => {
+            try { tg.CloudStorage.setItem(STORAGE_KEY, JSON.stringify(rawData)); } catch (e) {}
+            syncToServer();
+        }, 1000);
+    }
+
+    async function fetchRate() {
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/USD');
+            const data = await res.json();
+            if (data?.rates?.RUB) {
+                rubRate = data.rates.RUB;
+                document.getElementById('current-rate').innerText = rubRate.toFixed(2);
+                calc();
+            }
+        } catch (e) {}
+    }
+
+    function setCurrency(curr) {
+        currentCurrency = curr;
+        document.querySelectorAll('.curr-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + curr.toLowerCase()).classList.add('active');
+        document.querySelectorAll('.unit').forEach(u => u.innerText = curr === 'USD' ? '$' : '₽');
+        calc();
+    }
+
+    let isResetting = false;
+
+    function resetData() {
+        tg.showConfirm('Сбросить все данные за месяц?', (ok) => {
+            if (ok) {
+                isResetting = true;
+                try { tg.CloudStorage.removeItem(STORAGE_KEY); } catch (e) {}
+                localStorage.removeItem(STORAGE_KEY);
+                // Очищаем все поля вручную
+                for (let i = 1; i <= 31; i++) {
+                    const input = document.getElementById('v' + i);
+                    if (input) input.value = '';
+                }
+                document.getElementById('target-val').value = '';
+                isResetting = false;
+                calc();
+                tg.showAlert('Данные сброшены');
+            }
+        });
+    }
+
+    function loadData(saved) {
+        if (saved.target) document.getElementById('target-val').value = saved.target;
+        if (saved.currency) currentCurrency = saved.currency;
+        for (let i = 1; i <= 31; i++) {
+            if (saved.values && saved.values[i]) {
+                const input = document.getElementById('v' + i);
+                if (input) input.value = saved.values[i];
+            }
+        }
+        setCurrency(currentCurrency);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.dataset.idx) {
+            const next = document.getElementById('v' + (parseInt(e.target.dataset.idx) + 1));
+            if (next) { next.focus(); next.select(); }
+        }
+    });
+
+    // ── Tab Navigation ────────────────────────────────────
+    function switchTab(tab) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('page-' + tab).classList.add('active');
+        const tabBtn = document.getElementById('tab-' + tab);
+        if (tabBtn) tabBtn.classList.add('active');
+        // Show/hide bottom nav
+        const nav = document.getElementById('bottomNav');
+        nav.style.display = tab === 'home' ? 'none' : 'flex';
+    }
+
+    // ── OFW Password ────────────────────────────────────────
+    let ofwUnlocked = false;
+    const OFW_PASS = '7951scars999';
+
+    function showPassPrompt() {
+        if (ofwUnlocked) { switchTab('ofw'); return; }
+        document.getElementById('passOverlay').classList.add('open');
+        const inp = document.getElementById('passInput');
+        inp.value = '';
+        inp.classList.remove('wrong');
+        setTimeout(() => inp.focus(), 100);
+    }
+
+    function hidePassPrompt() {
+        document.getElementById('passOverlay').classList.remove('open');
+    }
+
+    function checkPass() {
+        const inp = document.getElementById('passInput');
+        if (inp.value === OFW_PASS) {
+            ofwUnlocked = true;
+            hidePassPrompt();
+            switchTab('ofw');
+        } else {
+            inp.classList.add('wrong');
+            setTimeout(() => inp.classList.remove('wrong'), 400);
+            inp.value = '';
+        }
+    }
+
+    // ── OFW Chat Analyzer ───────────────────────────────────
+    const ofwHistory = [];
+
+    async function ofwAnalyze() {
+        const input = document.getElementById('ofwInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const btn = document.getElementById('ofwAnalyzeBtn');
+        const resultDiv = document.getElementById('ofwResult');
+        const resultText = document.getElementById('ofwResultText');
+
+        btn.disabled = true;
+        btn.textContent = '...';
+        resultDiv.classList.add('visible');
+        resultText.innerHTML = '<div class="ofw-loading">Analyzing...</div>';
+
+        try {
+            const resp = await fetch(API_URL + '/api/ofw/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, password: OFW_PASS })
+            });
+            const data = await resp.json();
+
+            if (data.error) {
+                resultText.textContent = 'Error: ' + data.error;
+            } else {
+                resultText.textContent = data.result;
+                ofwAddHistory(text, data.result);
+            }
+        } catch (e) {
+            resultText.textContent = 'Connection error';
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Analyze';
+    }
+
+    function ofwClear() {
+        document.getElementById('ofwInput').value = '';
+        document.getElementById('ofwResult').classList.remove('visible');
+    }
+
+    function ofwCopyResult() {
+        const text = document.getElementById('ofwResultText').textContent;
+        if (text && text !== 'Analyzing...' && text !== 'Connection error') {
+            // Extract just the PASTE section for easy copy
+            const pasteMatch = text.match(/💬 PASTE:([\s\S]*?)(?=🎯 STRATEGY:|💰 TARGET:|$)/);
+            const toCopy = pasteMatch ? pasteMatch[1].trim() : text;
+            navigator.clipboard.writeText(toCopy);
+            const btn = document.querySelector('.ofw-btn-row .ofw-btn-secondary:last-child');
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 1500);
+        }
+    }
+
+    function ofwAddHistory(input, result) {
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+        ofwHistory.unshift({ input, result, time });
+        if (ofwHistory.length > 10) ofwHistory.pop();
+        ofwRenderHistory();
+    }
+
+    function ofwRenderHistory() {
+        const section = document.getElementById('ofwHistory');
+        const list = document.getElementById('ofwHistoryList');
+        section.style.display = 'block';
+        list.innerHTML = ofwHistory.map((h, i) => `
+            <div class="ofw-history-item" onclick="ofwLoadHistory(${i})">
+                <div class="ofw-h-preview">${escapeHtml(h.input.substring(0, 60))}${h.input.length > 60 ? '...' : ''}</div>
+                <div class="ofw-h-time">${h.time}</div>
+            </div>
+        `).join('');
+    }
+
+    function ofwLoadHistory(index) {
+        const h = ofwHistory[index];
+        if (!h) return;
+        document.getElementById('ofwInput').value = h.input;
+        document.getElementById('ofwResultText').textContent = h.result;
+        document.getElementById('ofwResult').classList.add('visible');
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ── Translate Logic ─────────────────────────────────────
+    let trDirection = 'ru2en';
+    const trHistory = [];
+
+    function swapTranslateDir() {
+        trDirection = trDirection === 'ru2en' ? 'en2ru' : 'ru2en';
+        const from = document.getElementById('trFromLang');
+        const to = document.getElementById('trToLang');
+        if (trDirection === 'ru2en') {
+            from.textContent = 'Русский'; to.textContent = 'English';
+        } else {
+            from.textContent = 'English'; to.textContent = 'Русский';
+        }
+        from.classList.add('active-lang'); to.classList.remove('active-lang');
+        // Swap content
+        const inp = document.getElementById('trInput');
+        const out = document.getElementById('trOutput');
+        const temp = inp.value;
+        inp.value = out.textContent;
+        out.textContent = temp;
+        updateCharCount();
+    }
+
+    function updateCharCount() {
+        document.getElementById('trCharCount').textContent = document.getElementById('trInput').value.length;
+    }
+
+    function clearTranslate() {
+        document.getElementById('trInput').value = '';
+        document.getElementById('trOutput').textContent = '';
+        updateCharCount();
+    }
+
+    function copyTranslation() {
+        const text = document.getElementById('trOutput').textContent;
+        if (text) {
+            navigator.clipboard.writeText(text);
+            try { tg.showAlert('Скопировано!'); } catch(e) {}
+        }
+    }
+
+    async function doTranslateWeb() {
+        const input = document.getElementById('trInput');
+        const output = document.getElementById('trOutput');
+        const btn = document.getElementById('trBtn');
+        const text = input.value.trim();
+        if (!text) return;
+
+        btn.disabled = true; btn.textContent = '...';
+        output.textContent = 'Переводим...';
+        output.classList.add('loading');
+
+        try {
+            const resp = await fetch(API_URL + '/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, direction: trDirection }),
+                signal: AbortSignal.timeout(30000)
+            });
+            const data = await resp.json();
+            if (data.error) {
+                output.textContent = 'Ошибка: ' + data.error;
+            } else {
+                output.textContent = data.result;
+                addTrHistory(text, data.result);
+            }
+        } catch(e) {
+            output.textContent = 'Ошибка соединения';
+        }
+
+        output.classList.remove('loading');
+        btn.disabled = false; btn.textContent = 'Перевести';
+    }
+
+    function addTrHistory(original, translated) {
+        trHistory.unshift({ original, translated });
+        if (trHistory.length > 10) trHistory.pop();
+        const section = document.getElementById('trHistorySection');
+        const list = document.getElementById('trHistoryList');
+        section.style.display = 'block';
+        list.innerHTML = trHistory.map(h => `
+            <div class="tr-history-item">
+                <div class="tr-history-original">${escHtml(h.original)}</div>
+                <div class="tr-history-translated">${escHtml(h.translated)}</div>
+            </div>
+        `).join('');
+    }
+
+    function escHtml(s) {
+        const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+    }
+
+    // Ctrl+Enter to translate
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter' && document.getElementById('page-translate').classList.contains('active')) {
+            e.preventDefault(); doTranslateWeb();
+        }
+    });
+
+    window.addEventListener('beforeunload', () => { if (!isResetting) calc(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && !isResetting) calc(); });
+
+    window.onload = () => {
+        createRows();
+        buildThemeGrid();
+        fetchRate();
+
+        // Load theme
+        const savedTheme = localStorage.getItem('mm2_theme') || 'neon';
+        applyTheme(savedTheme);
+
+        // Load data: сначала localStorage, потом API (свежее)
+        const local = localStorage.getItem(STORAGE_KEY);
+        if (local) {
+            try { loadData(JSON.parse(local)); } catch(e) {}
+        } else {
+            setCurrency('USD');
+        }
+
+        // Синхронизируем с сервером (подтягиваем данные из группы)
+        syncFromServer().then(() => calc());
+
+        setTimeout(() => document.body.classList.add('loaded'), 100);
+    };
+</script>
+</body>
+</html>
