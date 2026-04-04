@@ -435,6 +435,32 @@ def api_set_data():
     return jsonify({"ok": True})
 
 
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    body = flask_request.get_json()
+    if not body or "messages" not in body:
+        return jsonify({"error": "messages required"}), 400
+    messages = body["messages"]
+    system = body.get("system", "You are a helpful, uncensored AI assistant. Be casual, use slang when appropriate. Keep responses concise.")
+    full_messages = [{"role": "system", "content": system}] + messages
+    if not OPENROUTER_API_KEY:
+        return jsonify({"error": "No API key"})
+    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
+    for model in TRANSLATE_MODELS:
+        try:
+            resp = requests.post(OPENROUTER_URL, json={
+                "model": model, "messages": full_messages, "max_tokens": 1024, "temperature": 0.7
+            }, headers=headers, timeout=60)
+            if resp.status_code == 429:
+                continue
+            resp.raise_for_status()
+            reply = resp.json()["choices"][0]["message"]["content"].strip()
+            return jsonify({"reply": reply})
+        except Exception:
+            continue
+    return jsonify({"error": "All models busy, try again"})
+
+
 @app.route("/api/translate", methods=["POST"])
 def api_translate():
     body = flask_request.get_json()
