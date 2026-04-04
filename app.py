@@ -659,11 +659,13 @@ Never use: choke, teen, torture, forced, gangbang, drunk, whipping, fisting, rap
 Alternatives: choke→"grab my throat", torture→"punish me", forced→"make me"
 
 ## RESPONSE FORMAT:
-Always respond in this format:
-📊 ANALYSIS: [1-2 sentences about the situation]
-💬 PASTE: [ready-to-send message in English]
-🎯 STRATEGY: [next steps, what to push for]
-💰 TARGET: [realistic $ amount to aim for]"""
+Always respond in this EXACT format. PASTE must ALWAYS be in ENGLISH — this is critical, the fan speaks English.
+Analysis and Strategy can be in Russian for the chatter.
+
+📊 АНАЛИЗ: [1-2 предложения о ситуации на русском]
+💬 PASTE: [ready-to-send message in ENGLISH — casual, sexy, with emojis and kawaii elements]
+🎯 СТРАТЕГИЯ: [следующие шаги на русском — куда вести, что продавать]
+💰 ЦЕЛЬ: [реалистичная сумма в $]"""
 
 OFW_MODELS_TEXT = [
     "nousresearch/hermes-4-70b",
