@@ -707,13 +707,14 @@ FORMAT:
 💰 ЦЕЛЬ: [сумма в $ и как к ней прийти]"""
 
 OFW_MODELS_TEXT = [
-    "anthropic/claude-sonnet-4",
+    "meta-llama/llama-4-maverick",
     "deepseek/deepseek-v3.2",
+    "nousresearch/hermes-4-70b",
 ]
 
 OFW_MODELS_VISION = [
-    "anthropic/claude-sonnet-4",
     "google/gemini-2.0-flash-001",
+    "meta-llama/llama-4-maverick",
 ]
 
 
@@ -751,8 +752,8 @@ def ofw_analyze(text=None, images=None):
         for attempt in range(2):
             try:
                 resp = requests.post(OPENROUTER_URL, json={
-                    "model": model, "messages": messages, "max_tokens": 8192, "temperature": 0.8
-                }, headers=headers, timeout=120)
+                    "model": model, "messages": messages, "max_tokens": 4096, "temperature": 0.85
+                }, headers=headers, timeout=180)
                 if resp.status_code == 429:
                     if attempt == 0:
                         time.sleep(2)
