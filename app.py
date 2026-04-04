@@ -665,22 +665,48 @@ Always respond in this format:
 🎯 STRATEGY: [next steps, what to push for]
 💰 TARGET: [realistic $ amount to aim for]"""
 
-OFW_MODELS = [
+OFW_MODELS_TEXT = [
     "nousresearch/hermes-4-70b",
     "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
 ]
 
+OFW_MODELS_VISION = [
+    "google/gemini-2.0-flash-001",
+    "qwen/qwen-2.5-vl-72b-instruct",
+]
 
-def ofw_analyze(text):
-    """Analyze OF chat and generate sales paste."""
+
+def ofw_analyze(text=None, images=None):
+    """Analyze OF chat and generate sales paste. Supports text and/or images."""
     if not OPENROUTER_API_KEY:
         return "ERROR: No API key"
     headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
+
+    has_images = images and len(images) > 0
+
+    # Build user content
+    if has_images:
+        user_content = []
+        if text:
+            user_content.append({"type": "text", "text": text})
+        for img_b64 in images[:5]:  # max 5 images
+            user_content.append({
+                "type": "image_url",
+                "image_url": {"url": img_b64}
+            })
+        if not text:
+            user_content.append({"type": "text", "text": "Analyze this chat screenshot and generate a sales paste."})
+    else:
+        user_content = text
+
     messages = [
         {"role": "system", "content": OFW_SYSTEM_PROMPT},
-        {"role": "user", "content": text}
+        {"role": "user", "content": user_content}
     ]
-    for model in OFW_MODELS:
+
+    models = OFW_MODELS_VISION if has_images else OFW_MODELS_TEXT
+
+    for model in models:
         for attempt in range(2):
             try:
                 resp = requests.post(OPENROUTER_URL, json={
@@ -717,10 +743,12 @@ def api_ofw_analyze():
         return jsonify({"error": "wrong password"}), 403
 
     text = body.get("text", "").strip()
-    if not text:
-        return jsonify({"error": "text required"}), 400
+    images = body.get("images", [])
 
-    result = ofw_analyze(text)
+    if not text and not images:
+        return jsonify({"error": "text or images required"}), 400
+
+    result = ofw_analyze(text=text or None, images=images or None)
     if result.startswith("ERROR") or result.startswith("API Error"):
         return jsonify({"error": result})
     return jsonify({"result": result})
