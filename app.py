@@ -594,17 +594,26 @@ EXAMPLE DILDO stage:
 БАНДЛ: "CUM INSIDE ME!!! fuck me so hard like this is your last time, I want you to stick your finger in my ass while you destroy my pussy, your cum is pouring out of me and i love it, I catch every drop with my hand and lick it off my hand. Here my best cumming videos for you daddy, and I want you to cum with me.. 🤤"
 ДОБИВ: "I'll be your personal cum slut daddy, I'll do whatever you say.. i'm almost done and there's not much left, i'm waiting for your cock to explode inside me..."
 
-STYLE: raw, passionate, imagining sex WITH fan. Words: cock, pussy, nipples, wet, dripping, squelching, shaking legs. Self-labels: personal doll, cum slut, little slut. CAPS for climax: FUCKKK, CUM INSIDE ME. Sparse emojis: 🤤 💦 🥵 only at end. Each message 2-4 sentences.
+STYLE: extremely slutty, desperate, begging, submissive. The girl is a dirty little whore who LIVES to please daddy. She's dripping wet, shaking, can't control herself. She BEGS for cock, BEGS to be used. She describes every sensation in detail — how wet she is, how her pussy squelches, how her legs shake, how she can feel every vein. She calls herself: personal doll, cum slut, dirty little whore, obedient slut, daddy's fucktoy, desperate little slut. She uses: cock, pussy, nipples, wet, dripping, squelching, shaking legs, throbbing, oozing, stretching. CAPS for climax: FUCKKK, CUM INSIDE ME, PLEASE. Sparse emojis: 🤤 💦 🥵 🙏 only at end. Each message 2-4 sentences minimum.
 
 PRICES: Tits $7.77-9.99 | BJ $14.99-19.99 | Pussy $29.99-44.44 | Dildo $49.99-79.99
 
-BANNED ON OF: choke, teen, torture, forced, gangbang, drunk, fisting, rape, underage, piss, scat
+CRITICAL — BANNED WORDS ON ONLYFANS (NEVER use these words, you will get the account BANNED):
+choke, choking, teen, teenage, torture, tortured, forced, forcing, gangbang, gangbangs, drunk, drunken, whipping, fisting, fisted, rape, raping, rapist, underage, young, lolita, piss, pissing, scat, blood, bleeding, kidnap, kidnapped, chloroform, incest, unconscious, suffocate, strangle, vomit, golden, watersports, enema, escort, hooker, hypno, molest, mutilate, necrophilia, pedophile, prostitute, snuff, zoophilia, animal, dog, jail, knocked, passed, paralyzed, abduct
+USE THESE ALTERNATIVES INSTEAD:
+- choke → "grab my throat", "take my breath away"
+- forced → "make me", "take control of me"
+- whipping → "spanking"
+- teen/young → NEVER use, skip entirely
+- torture → "punish me", "discipline me"
+- gangbang → avoid entirely
+- drunk → avoid entirely
 
 Write ORIGINAL text, do NOT copy examples. Write ALL stages. Анализ и стратегия на русском, пасты на английском."""
 
 OFW_MODELS_TEXT = [
-    "nousresearch/hermes-4-405b",
     "deepseek/deepseek-v3.2",
+    "nousresearch/hermes-4-70b",
 ]
 
 OFW_MODELS_VISION = [
