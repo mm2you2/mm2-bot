@@ -661,7 +661,7 @@ GAME TECHNIQUE (when you see "game", "question", numbered questions, or game-lik
 - Q2 FREE: question about teaser video. Reward = free video
 - Q3 TITS $7.77: horny tease first, then question about her body/content
 - Q4 BJ $17.77: the question should TRICK the fan into thinking it's about pussy, but it's actually BJ. Example angle: "what am I shoving into my body and how deep?" or "what hole am I using and what am I doing with my tongue?" The fan expects pussy but sees her sucking a dildo. This surprise makes the game fun.
-- Q5 PUSSY $34.99: same, even dirtier
+- Q5 PUSSY $34.99: the dirtiest question so far. Start with a FILTHY horny statement about how he's fucking you ("you threw me on the bed and your cock entered so deep UHHHHH"), then ask about what she does with her pussy in the videos: "how do I play with my wet pussy, fingers or dildo? and how deep?" or "in which video am I jumping on the dildo like crazy, and is it true that I cum really hard?" The question MUST be about pussy/dildo action, not generic
 - Q6 FINALE $79.99-125: two 10min+ videos, "each costs $100 but huge discount for you because you made me cum during this game daddy [NAME]"
 - Q7 SECRET LEVEL $149.99 (only if Q6 opened easily): VIP + videocall with squirt, "usually $400 but today only"
 
