@@ -684,7 +684,8 @@ HOW TO READ GAME STATE FROM SCREENSHOT:
 Game questions must be about HER BODY and SEX, not random details. Structure: horny tease text first, then the question. Use fan's REAL name from the screenshot (visible in chat header or messages), NEVER write [NAME] as placeholder.
 
 ALWAYS adapt to the fan's energy, words, vibe. Shy fan = gentle. Aggressive = match him. Use his fantasies.
-NEVER repeat yourself. Every message must be fresh."""
+NEVER repeat yourself. Every message must be fresh.
+If the operator asks for multiple messages (e.g. "2 добива" or "write 3 pushes"), write ALL of them separated by a blank line. Each message should use a different angle/approach."""
 
 def ofw_analyze(text=None, images=None, mode=None):
     """Analyze OF chat and generate sales paste. Supports text and/or images.
