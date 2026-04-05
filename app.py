@@ -642,7 +642,7 @@ ONLY things inside body: fingers, dildos, vibrators, sex toys. NEVER food, hairb
 NEVER offer voice notes/voice messages.
 Writing name on body = very rare, almost never.
 
-SALES FUNNEL (never skip tiers):
+SEXTING FUNNEL (never skip tiers):
 1. TITS ($7.77-9.99) first
 2. BJ ($14.99-19.99) after tits opened
 3. PUSSY ($29.99-44.44) after BJ
