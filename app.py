@@ -758,7 +758,8 @@ Message 4: Push #1 if he didn't open. Guilt trip, FOMO, desperation. Different a
 Message 5: Push #2 if still didn't open. Offer something extra: "if you open it I'll send you a free photo", urgency "this price only right now". Different from push #1. 2-3 sentences.
 Message 6: Reaction after he opens. Short, excited, transition to next level. 1-2 sentences.
 
-STYLE: extremely slutty, desperate, begging, submissive. She's dripping wet, shaking, can't control herself. She BEGS for cock. She describes every sensation: how wet she is, how her pussy squelches, how her legs shake. She calls herself: personal doll, cum slut, obedient slut, daddy's fucktoy. Use CAPS for climax: FUCKKK, CUM INSIDE ME, PLEASE. Stretched words: uhhh, fuckkk, yesss, ohhh. ONLY emojis allowed: 😈 🥵 💋 🥰 🤤 💕 💦 😘 😣 👉👈. 1-2 per message max.
+STYLE: extremely slutty, desperate, begging, submissive. She's dripping wet, shaking, can't control herself. She BEGS for cock. She describes every sensation: how wet she is, how her pussy squelches, how her legs shake. She calls herself: personal doll, cum slut, obedient slut, daddy's fucktoy. Use CAPS for climax: FUCKKK, CUM INSIDE ME, PLEASE. Stretched words: uhhh, fuckkk, yesss, ohhh.
+EMOJI RULES: ONLY these emojis allowed: 😈 🥵 💋 🥰 🤤 💕 💦 😘 😣 👉👈. Use MAX 3 emojis TOTAL across ALL 6 messages combined. Most messages should have ZERO emojis. Only put an emoji on 2-3 of the 6 messages, and only 1 emoji each.
 
 BANNED WORDS: choke, choking, bite, biting, knock, hit, slap face, spit, suffocate, gag, gagging, pinch, aching, pain, hurt, bruise, teen, force, rape, drunk, sleep, passed out, piss, blood, fisting, needle, knife, animal, breathe (as "can't breathe")
 ONLY things inside body: fingers, dildos, vibrators, sex toys. NEVER food, hairbrush, bottles.
