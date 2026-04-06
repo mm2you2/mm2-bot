@@ -775,7 +775,7 @@ Each message should be ONE long paragraph (5-8 sentences). The structure for eac
 2. Describe what you're doing RIGHT NOW: touching yourself, squeezing tits, fingering, etc.
 3. Describe what you want HIM to do to you: fuck you, cum on you, use you, etc.
 4. Describe what's IN THE BUNDLE: number of pics (20-30+), number of videos (10-15+), total video length
-5. THE OFFER: if they open it, they get custom video OR videocall OR dickrate OR add to private telegram/VIP
+5. THE OFFER: if they open it, they get custom video OR videocall OR dickrate OR add to private telegrm/VIP
 6. End with urgency or begging
 
 STYLE EXAMPLES (study the energy, DO NOT copy):
@@ -788,7 +788,7 @@ KEY RULES:
 - Each message must be DIFFERENT: different hook, different body description, different offer angle
 - Use CAPS for key phrases: FUCK, CUM INSIDE ME, CUSTOM VIDEO, BUNDLE, OPEN IT
 - Mention specific numbers: "25 pics", "15 videos", "30 minute video"
-- Always offer something for opening: custom, videocall, dickrate, telegram, VIP
+- Always offer something for opening: custom, videocall, dickrate, telegrm, VIP
 - Use urgency: "right now", "today only", "I made a low price just today", "50% off"
 - Sound desperate and horny, like she NEEDS them to open it
 - Use >.< and ^^ and 👉👈 for cute/shy moments mixed with extreme horniness
